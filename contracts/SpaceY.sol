@@ -13,7 +13,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract QLF_SpaceY is IQLF, Ownable {
     uint256 start_time;
-    mapping(address => bool) black_list;
     mapping(address => bool) whitelist_list;
 
     constructor (uint256 _start_time) {
@@ -26,6 +25,26 @@ contract QLF_SpaceY is IQLF, Ownable {
 
     function set_start_time(uint256 _start_time) public onlyOwner {
         start_time = _start_time;
+    }
+    
+    function get_time() public view returns (uint256) {
+        return block.timestamp;
+    }
+
+    function isQualified(address account)
+        public view
+        returns (
+            bool qualified
+        )
+    {
+        if (start_time > block.timestamp) {
+            return false; 
+        }
+        if (!whitelist_list[account]) {
+            return false; 
+        }
+        return true;  
+        
     }
 
     function ifQualified(address account, bytes32[] memory data)
@@ -61,11 +80,7 @@ contract QLF_SpaceY is IQLF, Ownable {
         )
     {
         if (start_time > block.timestamp) {
-            black_list[account] = true;
-            (false, "not started"); 
-        }
-        if (black_list[account]) {
-            return (false, "blacklisted"); 
+            return (false, "not started"); 
         }
         if (!whitelist_list[account]) {
             return (false, "not whitelisted"); 
